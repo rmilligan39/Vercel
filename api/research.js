@@ -323,6 +323,44 @@ function httpsPost(options, payload) {
   });
 }
 
+/* ── Short URL-safe ID ───────────────────────────────────────────────────── */
+function generateId() {
+  // 9 base64url chars → 54 bits of randomness → ~1 in 500 trillion collision chance
+  return require('crypto').randomBytes(7).toString('base64url').slice(0, 9);
+}
+
+/* ── Upstash Redis helpers (REST API — no npm package needed) ────────────── */
+async function kvSet(key, value) {
+  const url   = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) {
+    console.warn('Upstash not configured — report will not be saved for sharing.');
+    return false;
+  }
+  // Upstash REST command format: POST with JSON array ["SET", key, value, "EX", seconds]
+  // TTL: 90 days = 7,776,000 seconds
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(['SET', key, value, 'EX', 7776000])
+  });
+  return res.ok;
+}
+
+async function kvGet(key) {
+  const url   = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  const res  = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(['GET', key])
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.result || null;
+}
+
 /* ── Main Vercel handler ─────────────────────────────────────────────────
    Vercel passes a Node.js IncomingMessage (req) and ServerResponse (res).
    No configuration files needed — Vercel auto-detects this as a function.
@@ -408,7 +446,18 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: 'Anthropic returned an empty response.' });
     }
 
-    return res.status(200).json({ html });
+    // Save to KV for sharing — store JSON with metadata
+    const id = generateId();
+    const record = JSON.stringify({
+      html,
+      ticker: query.trim().toUpperCase(),
+      createdAt: new Date().toISOString()
+    });
+    const saved = await kvSet('report:' + id, record);
+    console.log(`Report saved to KV: ${id} (saved=${saved})`);
+
+    // Return html + id — frontend uses id to build the shareable URL
+    return res.status(200).json({ html, id, saved });
 
   } catch (err) {
     console.error('Function error:', err.message);
