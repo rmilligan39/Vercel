@@ -331,13 +331,12 @@ function generateId() {
 
 /* ── Upstash Redis helpers (REST API — no npm package needed) ────────────── */
 async function kvSet(key, value) {
-  const url   = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url   = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
   if (!url || !token) {
     console.warn('Upstash not configured — report will not be saved for sharing.');
     return false;
   }
-  // Upstash REST command format: POST with JSON array ["SET", key, value, "EX", seconds]
   // TTL: 90 days = 7,776,000 seconds
   const res = await fetch(url, {
     method: 'POST',
@@ -348,8 +347,8 @@ async function kvSet(key, value) {
 }
 
 async function kvGet(key) {
-  const url   = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url   = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
   if (!url || !token) return null;
   const res  = await fetch(url, {
     method: 'POST',
