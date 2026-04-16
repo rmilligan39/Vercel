@@ -103,10 +103,8 @@ RIGHT — flex-column div, three stacked elements, no gap between them:
 
    [SECTION HEADER] PER SHARE DATA
    Revenues per Share
-   "Cash Flow" per Share
    Earnings per Share
    Dist. Decl'd per Share
-   Cap'l Spending per Share
    Book Value per Share
    Shares/Units Outstanding (M)
 
@@ -118,10 +116,15 @@ RIGHT — flex-column div, three stacked elements, no gap between them:
    [SECTION HEADER] INCOME STATEMENT ($M)
    Revenues ($mill)
    Operating Margin (%)
-   Depreciation ($mill)
+   EBITDA ($mill)
+   EBITDA Margin (%)
    Net Profit ($mill)
-   Income Tax Rate (%)
    Net Profit Margin (%)
+
+   [SECTION HEADER] CASH FLOW ($M)
+   Cash Flow ($mill)
+   Capital Expenditures ($mill)
+   Free Cash Flow ($mill)
 
    [SECTION HEADER] BALANCE SHEET ($M)
    Working Cap'l ($mill)
@@ -130,8 +133,7 @@ RIGHT — flex-column div, three stacked elements, no gap between them:
 
    [SECTION HEADER] RETURNS & CAPITAL ALLOCATION
    Return on Total Cap'l (%)
-   Return on Partners' Cap'l (%)
-   Retained to Partners' Cap'l (%)
+   Return on Equity (%)
    All Dist. to Net Profit (%)
 
    Use — for unavailable data. (E) in column headers only.
